@@ -15,13 +15,16 @@ jobs:
         sudo apt-get install -qq build-essential gpg
 
     - name: build
-      run: ./build.sh linux x86_64 && mv -v releases/bash bash-linux-x86_64
+      run: |
+        for arch in x86_64 aarch64; do
+          ./build.sh linux "${arch}" && mv -v releases/bash "bash-linux-${arch}"
+        done
       shell: bash
 
     - uses: actions/upload-artifact@v3  
       with:
-        name: bash-linux-x86_64
-        path: bash-linux-x86_64
+        name: bash-linux
+        path: bash-linux-*
 
     - name: Compute Short SHA
       id: ssha
@@ -39,7 +42,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
         with:
-          name: bash-linux-x86_64
+          name: bash-linux
 
       - name: release
         uses: marvinpinto/action-automatic-releases@latest
@@ -49,5 +52,5 @@ jobs:
           prerelease: false
           draft: false
           files: |
-            ./bash-linux-x86_64
+            ./bash-linux
           repo_token: ${{ secrets.GITHUB_TOKEN }}
